@@ -75,6 +75,34 @@ class DevicesController < ApplicationController
     end
   end
 
+  def list_for_ifttt
+    project_id = "wearableeot-39e6a"
+    key_file   = "service-account.json"
+    storage = Google::Cloud::Storage.new project: project_id, keyfile: key_file, timeout: 100000000
+    bucket  = storage.bucket "wearableeot-39e6a.appspot.com"
+    device_id = params[:device_id]
+    all_data = get_all_data()
+    all_keys = get_em(all_data)
+    all_devices_for = all_keys.select {|e| e =~/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/}
+
+    if all_devices_for.include? device_id
+      get_all_emails = all_keys.select {|e| e =~/\A[\w+\-|]+@[a-z\d\-]+(\|[a-z]+)*\|[a-z]+\z/}
+      all_devices_for_user = get_all_emails.map do |email|
+        {
+          user: email,
+          devices: get_em(all_data[email]).select {|e| e =~/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/}
+        }
+      end
+
+      get_final_user_and_device = all_devices_for_user.map {|e| e[:devices].include?(device_id) ? [e[:user], device_id] : nil}
+      get_final_user_and_device
+      results = get_single_device(all_data, get_final_user_and_device.compact.flatten)
+      render json: {"data": create_json_to_return(results, bucket)}
+    else
+      render json: {message: "#{device_id} not found."}
+    end
+  end
+
   private
 
   def get_all_data
