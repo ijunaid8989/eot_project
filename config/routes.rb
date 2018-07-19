@@ -30,6 +30,8 @@ Rails.application.routes.draw do
   get "/v1/emotions" => "devices#emotions"
   get "/v1/devices/:device_id/images/" => "devices#device_images"
   get "/v1/devices/:device_id/images/b/" => "home#list_device_images"
+  get "/ifttt/v1/triggers/devices" => "home#list_ifttt_device_images"
+  get "/ifttt/v1/triggers/devices/fields/:device_id/options" => "devices#list_for_ifttt"
 
   post "/ifttt/v1/test/setup", to: "devices#test_ifttt"
   post "/ifttt/v1/triggers/devices", to: "devices#ifttt_trigger"
