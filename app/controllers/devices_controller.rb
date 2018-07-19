@@ -1,4 +1,5 @@
 class DevicesController < ApplicationController
+  require "google/cloud/storage"
 
   swagger_controller :devices, "Devices"
 
